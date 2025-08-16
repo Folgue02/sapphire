@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
-    id 'maven-publish'
+	id 'java'
+	id 'maven-publish'
 }
 
 
@@ -8,37 +8,37 @@ group = 'io.github.folgue02'
 version = '0.1.0'
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
 
-    repositories {
-        mavenLocal()
-    }
+	repositories {
+		mavenLocal()
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation platform('org.junit:junit-bom:5.10.0')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // https://mvnrepository.com/artifact/org.projectlombok/lombok
-    annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    implementation 'org.projectlombok:lombok:1.18.38'
+	// https://mvnrepository.com/artifact/org.projectlombok/lombok
+	annotationProcessor 'org.projectlombok:lombok:1.18.38'
+	implementation 'org.projectlombok:lombok:1.18.38'
 
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	implementation 'org.apache.commons:commons-lang3:3.18.0'
 
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0-rc1'
+	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0-rc1'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }

@@ -14,49 +14,49 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class HttpUtils {
-    private HttpUtils() {}
+	private HttpUtils() {}
 
-    public static HttpRequest requestFromExchange(HttpExchange exchange) throws IOException {
-        var request = new HttpRequest();
+	public static HttpRequest requestFromExchange(HttpExchange exchange) throws IOException {
+		var request = new HttpRequest();
 
-        var uri = exchange.getRequestURI();
-        var requestBody = exchange.getRequestBody().readAllBytes();
-        var headers = new HashMap<>(exchange.getRequestHeaders());
-        var method = HttpMethod.ofString(exchange.getRequestMethod());
+		var uri = exchange.getRequestURI();
+		var requestBody = exchange.getRequestBody().readAllBytes();
+		var headers = new HashMap<>(exchange.getRequestHeaders());
+		var method = HttpMethod.ofString(exchange.getRequestMethod());
 
-        request.setHeaders(headers);
-        request.setRequestUri(uri);
-        request.setMethod(method);
-        request.setBody(requestBody);
-        request.setPathQueryAttributes(RouteUtils.parseQueryAttributes(uri.getRawQuery()));
+		request.setHeaders(headers);
+		request.setRequestUri(uri);
+		request.setMethod(method);
+		request.setBody(requestBody);
+		request.setPathQueryAttributes(RouteUtils.parseQueryAttributes(uri.getRawQuery()));
 
-        return request;
-    }
+		return request;
+	}
 
-    public static void writeResponseToExchange(HttpExchange exchange, HttpResponse response) throws IOException {
-        if (response.getHeaders() != null) {
-            for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
-                exchange.getResponseHeaders().set(entry.getKey(), entry.getValue());
-            }
-        }
+	public static void writeResponseToExchange(HttpExchange exchange, HttpResponse response) throws IOException {
+		if (response.getHeaders() != null) {
+			for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
+				exchange.getResponseHeaders().set(entry.getKey(), entry.getValue());
+			}
+		}
 
-        byte[] body = Objects.requireNonNullElse(response.getBody(), new byte[0]);
+		byte[] body = Objects.requireNonNullElse(response.getBody(), new byte[0]);
 
-        exchange.sendResponseHeaders(response.getStatus().getStatusCode(), body.length);
+		exchange.sendResponseHeaders(response.getStatus().getStatusCode(), body.length);
 
-        try (OutputStream os = exchange.getResponseBody()) {
-            if (body.length > 0) {
-                os.write(body);
-            }
-            os.flush();
-        }
-    }
+		try (OutputStream os = exchange.getResponseBody()) {
+			if (body.length > 0) {
+				os.write(body);
+			}
+			os.flush();
+		}
+	}
 
-    public static String decodeHttpComponent(String comp) {
-        try {
-            return URLDecoder.decode(comp, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return comp;
-        }
-    }
+	public static String decodeHttpComponent(String comp) {
+		try {
+			return URLDecoder.decode(comp, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			return comp;
+		}
+	}
 }
