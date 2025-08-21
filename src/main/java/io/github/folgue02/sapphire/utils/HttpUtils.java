@@ -24,6 +24,7 @@ public final class HttpUtils {
 		var headers = new HashMap<>(exchange.getRequestHeaders());
 		var method = HttpMethod.ofString(exchange.getRequestMethod());
 
+		request.httpProtocol = exchange.getProtocol();
 		request.headers = headers;
 		request.requestUri = uri;
 		request.method = method;

@@ -85,6 +85,9 @@ public class Router {
 		for (var kv : toMerge.routes.entrySet())
 			this.addRoute(kv.getKey(), kv.getValue());
 
+		for (var pair : toMerge.filters)
+			this.addFilter(pair.getLeft(), pair.getRight());
+
 		return this;
 	}
 

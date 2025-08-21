@@ -12,8 +12,19 @@ public record FilterSpecification(String routePattern, Set<HttpMethod> expectedM
 	/// using default values for the expected methods to cover *(an empty set, 
 	/// meaning that it will cover all requests no matter the method)* and for the
 	/// filter priority *([FilterPriority#DEFAULT])*.
+	/// 
+	/// @return The created filter specification.
 	public static FilterSpecification createWithDefaults(String routePattern) {
 		return new FilterSpecification(routePattern, Set.of(), FilterPriority.DEFAULT);
+	}
+
+	/// Calls the constructor passing the given route pattern to cover and the priority for the
+	/// filter and leaving the expected methods empty *(meaning, it covers all request no matter the
+	/// request method)*.
+	/// 
+	/// @return The created filter specification.
+	public static FilterSpecification createWithPriority(String routePattern, FilterPriority priority) {
+		return new FilterSpecification(routePattern, Set.of(), priority);
 	}
 
 	/// @return A clone of the instance, with the prepended prefix to the route pattern.

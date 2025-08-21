@@ -15,7 +15,6 @@ import io.github.folgue02.sapphire.server.exception.ResponseWriteException;
 import io.github.folgue02.sapphire.utils.HttpUtils;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +61,10 @@ public class SapphireServer implements HttpHandler {
 		// If a filter corresponds to the giving request, it is executed.
 		// If the filter decides to forward the request to a different handler, this one is 
 		// executed, and whatever other handler that would have been chosen for the request is ignored.
-		if (!matchedRouteFilters.isEmpty()) {
-			for (var filter : matchedRouteFilters) {
-				boolean success = runFilter(request, exchange, filter);
-				if (!success)
-					return;
-			}
+		for (var filter : matchedRouteFilters) {
+			boolean continueChain = runFilter(request, exchange, filter);
+			if (!continueChain)
+				return;
 		}
 
 		// Run handler
@@ -109,10 +106,10 @@ public class SapphireServer implements HttpHandler {
 	/// @param request Request object
 	/// @param exchange [HttpExchange] object used to write the response into.
 	/// @param filter The filter to run.
-	/// @return `false` if the request has been forwarded to a new handler *(
+	/// @return A *continue* flag, meaning, `false` if the request has been forwarded to a new handler *(
 	/// meaning that the filter hasn't passed on the request to the next element 
 	/// in the chain)*, `true` otherwise *(meaning that the request has been allowed
-	/// to be passed to the next element in the chain)*. 
+	/// continue to be passed to the next element in the chain)*. 
 	public boolean runFilter(HttpRequest request, HttpExchange exchange, RouteFilter filter) {
 		// TODO: Rethrow exceptions instead of just returning false?
 		Optional<BaseRouteHandler> forcedHandler;
@@ -131,8 +128,8 @@ public class SapphireServer implements HttpHandler {
 			} catch (Exception e) {
 				System.err.printf("An error has ocurred while executing the handler (%s) given by the filter.", forcedHandler.get());
 				e.printStackTrace();
-				return false;
 			}
+			return false;
 		}
 
 		return true;
