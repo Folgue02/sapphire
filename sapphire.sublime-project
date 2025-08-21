@@ -1,0 +1,28 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"name": "Sapphire web framework",
+			"folder_exclude_patterns": [
+				"target",
+				"build"
+			],
+			"file_exclude_patterns": [
+				"*.class",
+			]
+		}
+	],
+	"build_systems": [
+		{
+			"name": "Build project",
+			"shell_cmd": "gradle build",
+			"working_dir": "$project_path"
+		},
+		{
+			"name": "Test project",
+			"shell_cmd": "gradle test",
+			"working_dir": "$project_path"
+		},
+	]
+}
