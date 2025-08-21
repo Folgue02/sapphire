@@ -1,18 +1,14 @@
 package io.github.folgue02.sapphire.exchange;
 
 import io.github.folgue02.sapphire.consts.HeaderConsts;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Getter
-@Setter
 public final class HttpResponse {
-    private StatusCode status;
-    private Map<String, String> headers;
-    private byte[] body;
+    public StatusCode status;
+    public Map<String, String> headers;
+    public byte[] body;
 
     public HttpResponse() {
         this.status = StatusCode.OK;

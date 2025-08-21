@@ -24,25 +24,25 @@ public final class HttpUtils {
 		var headers = new HashMap<>(exchange.getRequestHeaders());
 		var method = HttpMethod.ofString(exchange.getRequestMethod());
 
-		request.setHeaders(headers);
-		request.setRequestUri(uri);
-		request.setMethod(method);
-		request.setBody(requestBody);
-		request.setPathQueryAttributes(RouteUtils.parseQueryAttributes(uri.getRawQuery()));
+		request.headers = headers;
+		request.requestUri = uri;
+		request.method = method;
+		request.body = requestBody;
+		request.pathQueryAttributes = RouteUtils.parseQueryAttributes(uri.getRawQuery());
 
 		return request;
 	}
 
 	public static void writeResponseToExchange(HttpExchange exchange, HttpResponse response) throws IOException {
-		if (response.getHeaders() != null) {
-			for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
+		if (response.headers != null) {
+			for (Map.Entry<String, String> entry : response.headers.entrySet()) {
 				exchange.getResponseHeaders().set(entry.getKey(), entry.getValue());
 			}
 		}
 
-		byte[] body = Objects.requireNonNullElse(response.getBody(), new byte[0]);
+		byte[] body = Objects.requireNonNullElse(response.body, new byte[0]);
 
-		exchange.sendResponseHeaders(response.getStatus().getStatusCode(), body.length);
+		exchange.sendResponseHeaders(response.status.code, body.length);
 
 		try (OutputStream os = exchange.getResponseBody()) {
 			if (body.length > 0) {

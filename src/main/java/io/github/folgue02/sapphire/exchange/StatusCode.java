@@ -1,9 +1,7 @@
 package io.github.folgue02.sapphire.exchange;
 
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
-@Getter
 public enum StatusCode {
 	OK(200),
 
@@ -14,10 +12,10 @@ public enum StatusCode {
 
 	INTERNAL_SERVER_ERROR(500);
 
-	private final int statusCode;
+	public final int code;
 
-	StatusCode(int statusCode) {
-		this.statusCode = statusCode;
+	StatusCode(int code) {
+		this.code = code;
 	}
 
 	public String getReasonPhrase() {

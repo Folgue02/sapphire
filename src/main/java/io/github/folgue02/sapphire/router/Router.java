@@ -5,43 +5,56 @@ import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.router.exception.RouteExistsException;
 import io.github.folgue02.sapphire.router.functional.RouteConfigurator;
 import io.github.folgue02.sapphire.router.handler.BaseRouteHandler;
-import lombok.Getter;
+import io.github.folgue02.sapphire.filter.FilterSpecification;
+import io.github.folgue02.sapphire.filter.RouteFilter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
+import org.apache.commons.lang3.tuple.Pair;
+
 public class Router {
-	private final String prefix;
-	private final Map<RouteSpecification, BaseRouteHandler> routes;
+	public final String prefix;
+	public final Map<RouteSpecification, BaseRouteHandler> routes;
+	public final Set<Pair<FilterSpecification, RouteFilter>> filters;
 
 	public Router() {
 		this.routes = new HashMap<>();
+		this.filters = new HashSet<>();
 		this.prefix = null;
 	}
 
 	private Router(String prefix) {
-		this.routes = new HashMap<>();
 		this.prefix = prefix;
+		this.routes = new HashMap<>();
+		this.filters = new HashSet<>();
 	}
 
-	/// Creates an instance of [Router] which will prepend the given prefix to all the given routes.
+	/// Creates an instance of [Router] which will prepend the given prefix to all the routes.
 	public static Router withPrefix(String prefix) {
 		return new Router(prefix);
 	}
 
 	/// Adds a route to the router.
 	///
-	/// @param rSpec Route specification for the
-	/// @param rHandler Handler for the route.
+	/// @param rSpec Route specification for the handler.
+	/// @param rHandler Handler which will be executed when a request matches its spe
+	///                 specification.
 	/// @throws RouteExistsException If a route with the same HTTP method and route already exists.
 	/// @return The instance of the router.
-	public Router addRoute(RouteSpecification rSpec, BaseRouteHandler rHandler) throws RouteExistsException {
+	public Router addRoute(RouteSpecification rSpec, BaseRouteHandler<?> rHandler) throws RouteExistsException {
 		rSpec = this.prefix != null ? rSpec.cloneWithPrefix(this.prefix) : rSpec;
 		if (this.routes.containsKey(rSpec))
 			throw new RouteExistsException(rSpec);
 
 		this.routes.put(rSpec, rHandler);
+		return this;
+	}
+
+	public Router addFilter(FilterSpecification fSpec, RouteFilter filter) {
+		fSpec = this.prefix != null ? fSpec.cloneWithPrefix(this.prefix) : fSpec;
+
+		this.filters.add(Pair.of(fSpec, filter));
 		return this;
 	}
 
@@ -65,9 +78,9 @@ public class Router {
 		List<RouteSpecification> conflictingRSpecs = toMerge.routes.keySet().stream()
 				.filter(this.routes::containsKey)
 				.toList();
-
+ 
 		if (!conflictingRSpecs.isEmpty())
-			throw new RouteExistsException(conflictingRSpecs);
+			throw RouteExistsException.ofConflictedRouteSpecs(conflictingRSpecs);
 
 		for (var kv : toMerge.routes.entrySet())
 			this.addRoute(kv.getKey(), kv.getValue());
@@ -82,15 +95,34 @@ public class Router {
 		return this;
 	}
 
+	/// Finds the matched route for the given request.
+	/// 
+	/// @param request Request object used to determine which route is appropiate.
+	/// @return The matched route, or in case there is no match, [Optional#empty()] is returned.
 	public Optional<Map.Entry<RouteSpecification, BaseRouteHandler>> findMatchedRoute(HttpRequest request) {
 		return this.routes.entrySet().stream()
 				.filter(kv -> {
 					final var routeSpecification = kv.getKey();
 					final var rMethod = routeSpecification.method();
 
-					return request.getMethod() == rMethod && routeSpecification.matchesPath(request.getRequestUri().getPath());
+					return request.method == rMethod && routeSpecification.matchesPath(request.requestUri.getPath());
 				})
+				.sorted()
 				.findFirst();
+	}
+
+	/// Returns all the filters which match the given request, in order of priority
+	/// *(highest priority first)*.
+	///
+	/// @param request Request object to be used to find matches.
+	/// @return Sorted list *(high priority first)* of the filters which match the
+	/// request.
+	public List<RouteFilter> findMatchedFilters(HttpRequest request) {
+		return this.filters.stream()
+			.filter(pair -> pair.getLeft().matchesRequest(request))
+			.sorted(Comparator.comparing(Pair::getKey))
+			.map(Map.Entry::getValue)
+			.toList();
 	}
 
 	@Override

@@ -11,20 +11,20 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class TestBaseRouteHandler {
-    @Test
-    public void testRouteWithPrefix() throws RouteExistsException {
-        var expectedRoutes = Stream.of("/accounts/profile", "/accounts/logout", "/homepage").sorted().toList();
-        var router = new Router();
-        router.addRoute(HttpMethod.GET, "/homepage", new DumbHandler())
-                .withPrefix("/accounts", accountRouter -> {
-                    accountRouter.addRoute(HttpMethod.GET, "profile", new DumbHandler());
-                    accountRouter.addRoute(HttpMethod.GET, "logout", new DumbHandler());
-                });
-        List<String> routes = router.getRoutes().keySet().stream()
-                .map(RouteSpecification::routeSpecification)
-                .sorted()
-                .toList();
+	@Test
+	public void testRouteWithPrefix() throws RouteExistsException {
+		var expectedRoutes = Stream.of("/accounts/profile", "/accounts/logout", "/homepage").sorted().toList();
+		var router = new Router();
+		router.addRoute(HttpMethod.GET, "/homepage", new DumbHandler())
+				.withPrefix("/accounts", accountRouter -> {
+					accountRouter.addRoute(HttpMethod.GET, "profile", new DumbHandler());
+					accountRouter.addRoute(HttpMethod.GET, "logout", new DumbHandler());
+				});
+		List<String> routes = router.routes.keySet().stream()
+				.map(RouteSpecification::routeSpecification)
+				.sorted()
+				.toList();
 
-        assertEquals(expectedRoutes, routes);
-    }
+		assertEquals(expectedRoutes, routes);
+	}
 }

@@ -1,5 +1,6 @@
 package io.github.folgue02.sapphire.router.handler.impl;
 
+import io.github.folgue02.sapphire.consts.HeaderConsts;
 import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.exchange.StatusCode;
@@ -19,8 +20,8 @@ public final class RedirectHandler extends BaseRouteHandler<Boolean> {
 
     @Override
     public HttpResponse processResult(HttpResponse response, Boolean result) throws Exception {
-        response.setStatus(StatusCode.PERMANENT_REDIRECT);
-        response.putHeader("Location", this.targetRoute);
+        response.status = StatusCode.PERMANENT_REDIRECT;
+        response.putHeader(HeaderConsts.LOCATION, this.targetRoute);
 
         return response;
     }

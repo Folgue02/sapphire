@@ -1,6 +1,7 @@
 package io.github.folgue02.sapphire.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,15 @@ public class RouteUtils {
 			return first + "/" + second;
 
 		return first + second;
+	}
+
+	/// Checks if the given string matches with the given wildcard/glob pattern.
+	///
+	/// @param pattern Pattern to use for the comparison
+	/// @param string String to be compared to the pattern.
+	/// @return `true` if it matches, or `false` if it doesn't.
+	public static boolean routeMatchesGlob(String pattern, String string) {
+		return FilenameUtils.wildcardMatch(string, pattern);
 	}
 
 	public static Map<String, String> parseQueryAttributes(String rawQuery) {

@@ -7,33 +7,31 @@ import io.github.folgue02.sapphire.SapphireConsts;
 import io.github.folgue02.sapphire.exception.SapphireException;
 import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.exchange.HttpResponse;
+import io.github.folgue02.sapphire.filter.RouteFilter;
 import io.github.folgue02.sapphire.router.RouteSpecification;
 import io.github.folgue02.sapphire.router.Router;
 import io.github.folgue02.sapphire.router.handler.BaseRouteHandler;
 import io.github.folgue02.sapphire.server.exception.ResponseWriteException;
 import io.github.folgue02.sapphire.utils.HttpUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Getter
-@Setter
 public class SapphireServer implements HttpHandler {
-	private final Router router;
-	private final InetSocketAddress address;
-	private BaseRouteHandler<?> notFoundHandler;
-	private BaseRouteHandler<?> internalServerError;
+	public final Router router;
+	public final InetSocketAddress address;
+	public BaseRouteHandler<?> notFoundHandler;
+	public BaseRouteHandler<?> internalServerErrorHandler;
 
 	public SapphireServer(Router router, InetSocketAddress address) {
 		this.address = address;
 		this.router = router;
 		this.notFoundHandler = SapphireConsts.DEFAULT_NOT_FOUND_HANDLER;
-		this.internalServerError = SapphireConsts.DEFAULT_INTERNAL_ERROR_HANDLER;
+		this.internalServerErrorHandler = SapphireConsts.DEFAULT_INTERNAL_ERROR_HANDLER;
 	}
 
 	public void run() throws Exception {
@@ -46,7 +44,6 @@ public class SapphireServer implements HttpHandler {
 
 	@Override
 	public void handle(HttpExchange exchange) {
-		System.out.println("TEST");
 		final String path = exchange.getHttpContext().getPath();
 		final RouteSpecification rSpec;
 		final BaseRouteHandler routeHandler;
@@ -56,30 +53,99 @@ public class SapphireServer implements HttpHandler {
 			request = HttpUtils.requestFromExchange(exchange);
 		} catch (Exception e) {
 			System.out.println("Couldn't read from request.");
+			e.printStackTrace();
 			return;
 		}
 
-		Optional<Map.Entry<RouteSpecification, BaseRouteHandler>> handlerOpt = this.router.findMatchedRoute(request);
+		List<RouteFilter> matchedRouteFilters = this.router.findMatchedFilters(request);
 
+		// If a filter corresponds to the giving request, it is executed.
+		// If the filter decides to forward the request to a different handler, this one is 
+		// executed, and whatever other handler that would have been chosen for the request is ignored.
+		if (!matchedRouteFilters.isEmpty()) {
+			for (var filter : matchedRouteFilters) {
+				boolean success = runFilter(request, exchange, filter);
+				if (!success)
+					return;
+			}
+		}
+
+		// Run handler
+		Optional<Map.Entry<RouteSpecification, BaseRouteHandler>> handlerOpt = this.router.findMatchedRoute(request);
 		if (handlerOpt.isEmpty()) {
 			routeHandler = this.notFoundHandler;
-			rSpec = new RouteSpecification(request.getMethod(), request.getRequestUri().getPath());
+			rSpec = new RouteSpecification(request.method, request.requestUri.getPath());
 		} else {
 			rSpec = handlerOpt.get().getKey();
 			routeHandler = handlerOpt.get().getValue();
 		}
 
-		try (exchange) {
-			var response = routeHandler.runHandler(request);
-			this.writeResponse(response, exchange);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Couldn't handle request and write to response.");
+		if (!runHandler(request, exchange, routeHandler)) {
+			System.err.printf("The route handler (%s) has failed.\n", routeHandler);
 		}
 	}
 
+	/// Runs the given handler, and writes to the response.
+	///
+	/// @param request Request object
+	/// @param exchange Http exchange object in which the response will be written into.
+	/// @param routeHandler Route handler to run.
+	/// @return `true` if the handler has been executed without errors, `false` otherwise.
+	public boolean runHandler(HttpRequest request, HttpExchange exchange, BaseRouteHandler routeHandler) {
+		try (exchange) {
+			var response = routeHandler.runHandler(request);
+			this.writeResponse(response, exchange);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Couldn't handle request and write to response.");
+			return false;
+		}
+	}
+
+	/// Processes the given filter, and in the case that the filter forwards
+	/// into a route handler, runs the handler.
+	///
+	/// @param request Request object
+	/// @param exchange [HttpExchange] object used to write the response into.
+	/// @param filter The filter to run.
+	/// @return `false` if the request has been forwarded to a new handler *(
+	/// meaning that the filter hasn't passed on the request to the next element 
+	/// in the chain)*, `true` otherwise *(meaning that the request has been allowed
+	/// to be passed to the next element in the chain)*. 
+	public boolean runFilter(HttpRequest request, HttpExchange exchange, RouteFilter filter) {
+		// TODO: Rethrow exceptions instead of just returning false?
+		Optional<BaseRouteHandler> forcedHandler;
+		try {
+			forcedHandler = filter.filter(request);
+		} catch (Exception e) {
+			System.err.printf("An error ocurred while running the given filter(%s). \n", filter);
+			e.printStackTrace();
+			return false;
+		}
+		
+		if (forcedHandler.isPresent()) {
+			try {
+				HttpResponse response = forcedHandler.get().runHandler(request);
+				writeResponse(response, exchange);
+			} catch (Exception e) {
+				System.err.printf("An error has ocurred while executing the handler (%s) given by the filter.", forcedHandler.get());
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/// Writes the given response object to the client.
+	/// 
+	/// @param response Response object containing the data to write.
+	/// @param exchange [HttpExchange] object used to write data to the client.
+	/// @throws ResponseWriteException If an IO error while writing to the client occurs.
+	/// @throws SapphireException If an unhandled exception occurs while writing to the client.
 	private void writeResponse(HttpResponse response, HttpExchange exchange) throws SapphireException {
-		try (OutputStream os = exchange.getResponseBody()) {
+		try {
 			HttpUtils.writeResponseToExchange(exchange, response);
 		} catch (IOException e) {
 			throw new ResponseWriteException("Couldn't write the response object into the HTTP exchange. " + e.getMessage(), e);
