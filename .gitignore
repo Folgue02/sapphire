@@ -38,5 +38,8 @@ bin/
 ### VS Code ###
 .vscode/
 
+### Sublime Text ###
+*.sublime-workspace
+
 ### Mac OS ###
 .DS_Store
