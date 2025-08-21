@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,8 +37,8 @@ public final class HttpUtils {
 
 	public static void writeResponseToExchange(HttpExchange exchange, HttpResponse response) throws IOException {
 		if (response.headers != null) {
-			for (Map.Entry<String, String> entry : response.headers.entrySet()) {
-				exchange.getResponseHeaders().set(entry.getKey(), entry.getValue());
+			for (Map.Entry<String, List<String>> entry : response.headers.entrySet()) {
+				exchange.getResponseHeaders().put(entry.getKey(), entry.getValue());
 			}
 		}
 
