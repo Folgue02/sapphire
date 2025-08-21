@@ -6,6 +6,17 @@ import io.github.folgue02.sapphire.exchange.HttpMethod;
 import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.utils.RouteUtils;
 
+/// A filter specification defines what request should be passed throught the filter.
+///
+/// Components of a filter:
+///
+/// - `routePattern`, the pattern used to check if the request should pass through the filter
+///   if the request's path matches.
+/// - `expectedMethods`, specify which kind of request should be passed through the filters, *(i.e.
+///   GET, POST...)*, if this is empty, the filter should catch all request *(as long as it matches
+///   the rest of criteria)*.
+/// - `priority`, sapphire's way to determine which filter should be executed first is using priority, higher priority
+///   filters are executed first *(considering that [FilterPriority#EXTREME] is higher than [FilterPriority#HIGH])*.
 public record FilterSpecification(String routePattern, Set<HttpMethod> expectedMethods, FilterPriority priority) 
 		implements Comparable<FilterSpecification> {
 	/// Calls the constructor passing the given route pattern to cover, and 

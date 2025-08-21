@@ -4,6 +4,14 @@ import io.github.folgue02.sapphire.exchange.HttpMethod;
 import io.github.folgue02.sapphire.utils.RouteUtils;
 import org.apache.commons.lang3.StringUtils;
 
+/// A route specification defines which requests should be handled by a route handler.
+///
+/// Components of a route specification:
+///
+/// - `method`, specifies which method *(or HTTP verb, however you want to call it)*
+///   the request should have in order to be passed to the associated route handler.
+/// - `routeSpecification`, the route pattern that the request has to match in order 
+///   to be passed to the associated handler.
 public record RouteSpecification(HttpMethod method, String routeSpecification) {
 
 	///  Creates a cloned instance prepending the given prefix on the routeSpecification specification.

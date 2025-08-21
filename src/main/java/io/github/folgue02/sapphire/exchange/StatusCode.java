@@ -2,6 +2,8 @@ package io.github.folgue02.sapphire.exchange;
 
 import org.apache.commons.lang3.StringUtils;
 
+/// Representations of different status codes used as responses
+/// by the server.
 public enum StatusCode {
 	OK(200),
 

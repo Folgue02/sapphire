@@ -4,7 +4,7 @@ import io.github.folgue02.sapphire.exchange.HttpMethod;
 import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.router.exception.RouteExistsException;
 import io.github.folgue02.sapphire.router.functional.RouteConfigurator;
-import io.github.folgue02.sapphire.router.handler.BaseRouteHandler;
+import io.github.folgue02.sapphire.router.handler.RouteHandler;
 import io.github.folgue02.sapphire.filter.FilterSpecification;
 import io.github.folgue02.sapphire.filter.RouteFilter;
 
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class Router {
 	public final String prefix;
-	public final Map<RouteSpecification, BaseRouteHandler> routes;
+	public final Map<RouteSpecification, RouteHandler> routes;
 	public final Set<Pair<FilterSpecification, RouteFilter>> filters;
 
 	public Router() {
@@ -42,7 +42,7 @@ public class Router {
 	///                 specification.
 	/// @throws RouteExistsException If a route with the same HTTP method and route already exists.
 	/// @return The instance of the router.
-	public Router addRoute(RouteSpecification rSpec, BaseRouteHandler<?> rHandler) throws RouteExistsException {
+	public Router addRoute(RouteSpecification rSpec, RouteHandler<?> rHandler) throws RouteExistsException {
 		rSpec = this.prefix != null ? rSpec.cloneWithPrefix(this.prefix) : rSpec;
 		if (this.routes.containsKey(rSpec))
 			throw new RouteExistsException(rSpec);
@@ -65,7 +65,7 @@ public class Router {
 	/// @param rHandler Handler for the route.
 	/// @throws RouteExistsException If a route with the same HTTP method and route already exists.
 	/// @return The instance of the router.
-	public Router addRoute(HttpMethod method, String route, BaseRouteHandler<?> rHandler) throws RouteExistsException {
+	public Router addRoute(HttpMethod method, String route, RouteHandler<?> rHandler) throws RouteExistsException {
 		return this.addRoute(new RouteSpecification(method, route), rHandler);
 	}
 
@@ -102,7 +102,7 @@ public class Router {
 	/// 
 	/// @param request Request object used to determine which route is appropiate.
 	/// @return The matched route, or in case there is no match, [Optional#empty()] is returned.
-	public Optional<Map.Entry<RouteSpecification, BaseRouteHandler>> findMatchedRoute(HttpRequest request) {
+	public Optional<Map.Entry<RouteSpecification, RouteHandler>> findMatchedRoute(HttpRequest request) {
 		return this.routes.entrySet().stream()
 				.filter(kv -> {
 					final var routeSpecification = kv.getKey();

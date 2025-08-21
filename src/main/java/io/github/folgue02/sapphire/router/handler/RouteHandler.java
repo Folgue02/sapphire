@@ -5,14 +5,14 @@ import io.github.folgue02.sapphire.exchange.HttpRequest;
 import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.server.exception.HandlerExecutionException;
 
-public abstract class BaseRouteHandler<T> {
+public interface RouteHandler<T> {
 	/// Handles the request, and returns the expected result.
-	public abstract T handleRequest(HttpRequest request, HttpResponse response) throws Exception;
+	public T handleRequest(HttpRequest request, HttpResponse response) throws Exception;
 
 	/// Processes the result from the handler, and returns the response which will be given to the user.
-	public abstract HttpResponse processResult(HttpResponse response, T result) throws Exception;
+	public HttpResponse processResult(HttpResponse response, T result) throws Exception;
 
-	public HttpResponse runHandler(HttpRequest request) throws SapphireException {
+	public default HttpResponse runHandler(HttpRequest request) throws SapphireException {
 		var response = new HttpResponse();
 
 		T result;
@@ -31,5 +31,5 @@ public abstract class BaseRouteHandler<T> {
 
 	/// Provides a description of the handler, which might be used in things
 	/// like listing the routes.
-	public abstract String getHandlerDescription();
+	public String getHandlerDescription();
 }

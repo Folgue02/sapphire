@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+/// Represents the request made by a browser or other kind of client
+/// to the server.
 public class HttpRequest {
 	public HttpMethod method;
 	public String httpProtocol;

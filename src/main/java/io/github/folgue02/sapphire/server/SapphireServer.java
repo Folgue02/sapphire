@@ -10,7 +10,7 @@ import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.filter.RouteFilter;
 import io.github.folgue02.sapphire.router.RouteSpecification;
 import io.github.folgue02.sapphire.router.Router;
-import io.github.folgue02.sapphire.router.handler.BaseRouteHandler;
+import io.github.folgue02.sapphire.router.handler.RouteHandler;
 import io.github.folgue02.sapphire.server.exception.ResponseWriteException;
 import io.github.folgue02.sapphire.utils.HttpUtils;
 
@@ -23,8 +23,8 @@ import java.util.Optional;
 public class SapphireServer implements HttpHandler {
 	public final Router router;
 	public final InetSocketAddress address;
-	public BaseRouteHandler<?> notFoundHandler;
-	public BaseRouteHandler<?> internalServerErrorHandler;
+	public RouteHandler<?> notFoundHandler;
+	public RouteHandler<?> internalServerErrorHandler;
 
 	public SapphireServer(Router router, InetSocketAddress address) {
 		this.address = address;
@@ -45,7 +45,7 @@ public class SapphireServer implements HttpHandler {
 	public void handle(HttpExchange exchange) {
 		final String path = exchange.getHttpContext().getPath();
 		final RouteSpecification rSpec;
-		final BaseRouteHandler routeHandler;
+		final RouteHandler routeHandler;
 
 		HttpRequest request;
 		try {
@@ -68,7 +68,7 @@ public class SapphireServer implements HttpHandler {
 		}
 
 		// Run handler
-		Optional<Map.Entry<RouteSpecification, BaseRouteHandler>> handlerOpt = this.router.findMatchedRoute(request);
+		Optional<Map.Entry<RouteSpecification, RouteHandler>> handlerOpt = this.router.findMatchedRoute(request);
 		if (handlerOpt.isEmpty()) {
 			routeHandler = this.notFoundHandler;
 			rSpec = new RouteSpecification(request.method, request.requestUri.getPath());
@@ -88,7 +88,7 @@ public class SapphireServer implements HttpHandler {
 	/// @param exchange Http exchange object in which the response will be written into.
 	/// @param routeHandler Route handler to run.
 	/// @return `true` if the handler has been executed without errors, `false` otherwise.
-	public boolean runHandler(HttpRequest request, HttpExchange exchange, BaseRouteHandler routeHandler) {
+	public boolean runHandler(HttpRequest request, HttpExchange exchange, RouteHandler routeHandler) {
 		try (exchange) {
 			var response = routeHandler.runHandler(request);
 			this.writeResponse(response, exchange);
@@ -112,7 +112,7 @@ public class SapphireServer implements HttpHandler {
 	/// continue to be passed to the next element in the chain)*. 
 	public boolean runFilter(HttpRequest request, HttpExchange exchange, RouteFilter filter) {
 		// TODO: Rethrow exceptions instead of just returning false?
-		Optional<BaseRouteHandler> forcedHandler;
+		Optional<RouteHandler> forcedHandler;
 		try {
 			forcedHandler = filter.filter(request);
 		} catch (Exception e) {

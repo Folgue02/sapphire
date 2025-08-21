@@ -4,7 +4,6 @@ import io.github.folgue02.sapphire.exception.SapphireException;
 import io.github.folgue02.sapphire.router.RouteSpecification;
 import io.github.folgue02.sapphire.filter.FilterSpecification;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
