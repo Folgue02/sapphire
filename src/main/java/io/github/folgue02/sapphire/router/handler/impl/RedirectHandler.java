@@ -6,7 +6,7 @@ import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.exchange.StatusCode;
 import io.github.folgue02.sapphire.router.handler.RouteHandler;
 
-public final class RedirectHandler implements RouteHandler<Boolean> {
+public final class RedirectHandler extends RouteHandler {
 	private final String targetRoute;
 
 	public RedirectHandler(String targetRoute) {
@@ -14,12 +14,7 @@ public final class RedirectHandler implements RouteHandler<Boolean> {
 	}
 
 	@Override
-	public Boolean processInput(HttpRequest request) throws Exception {
-		return false;
-	}
-
-	@Override
-	public HttpResponse processResult(HttpResponse response, Boolean result) throws Exception {
+	public HttpResponse runHandler(HttpRequest _request, HttpResponse response) throws Exception {
 		response.status = StatusCode.PERMANENT_REDIRECT;
 		response.putHeader(HeaderConsts.LOCATION, this.targetRoute);
 

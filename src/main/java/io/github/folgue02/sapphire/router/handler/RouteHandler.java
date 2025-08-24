@@ -1,35 +1,17 @@
 package io.github.folgue02.sapphire.router.handler;
 
-import io.github.folgue02.sapphire.exception.SapphireException;
-import io.github.folgue02.sapphire.exchange.HttpRequest;
-import io.github.folgue02.sapphire.exchange.HttpResponse;
-import io.github.folgue02.sapphire.server.exception.HandlerExecutionException;
+import io.github.folgue02.sapphire.exchange.*;
+import io.github.folgue02.sapphire.router.Router;
 
-public interface RouteHandler<T> {
-	/// Handles the request, and returns the expected result.
-	public T processInput(HttpRequest request) throws Exception;
-
-	/// Processes the result from the handler, and returns the response which will be given to the user.
-	public HttpResponse processResult(HttpResponse response, T result) throws Exception;
-
-	public default HttpResponse runHandler(HttpRequest request) throws SapphireException {
-		var response = new HttpResponse();
-
-		T result;
-		try {
-			result = this.processInput(request);
-		} catch (Exception e) {
-			throw new HandlerExecutionException(this.getClass(), "Execution of handle() failed.", e);
-		}
-
-		try {
-			return this.processResult(response, result);
-		} catch (Exception e) {
-			throw new HandlerExecutionException(this.getClass(), "Couldn't process the result of the handle().", e);
-		}
-	}
-
-	/// Provides a description of the handler, which might be used in things
-	/// like listing the routes.
-	public String getHandlerDescription();
+/// Definition of a route handler class to be inherited from.
+/// 
+/// A route handler takes a request and returns a response, performing all
+/// required logic in the middle of the process *(processing input, inserting records,
+/// generating the output, etc...)*.
+/// 
+/// Route handlers are supposed to be registered in a [Router] object, being paired
+/// with a [io.github.folgue02.sapphire.router.RouteSpecification].
+public abstract class RouteHandler {
+    public abstract HttpResponse runHandler(HttpRequest request, HttpResponse response) throws Exception;
+	public abstract String getHandlerDescription();
 }

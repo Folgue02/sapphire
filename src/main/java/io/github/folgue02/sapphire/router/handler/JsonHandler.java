@@ -3,7 +3,7 @@ package io.github.folgue02.sapphire.router.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.folgue02.sapphire.exchange.HttpResponse;
 
-public abstract class JsonHandler implements RouteHandler<Object> {
+public abstract class JsonHandler<IN, OUT> extends IORouteHandler<IN, OUT> {
 	private ObjectMapper oMapper = new ObjectMapper();
 
 	public void setObjectMapper(ObjectMapper objectMapper) {
@@ -11,8 +11,8 @@ public abstract class JsonHandler implements RouteHandler<Object> {
 	}
 
 	@Override
-	public HttpResponse processResult(HttpResponse response, Object result) throws Exception {
-		response.setBody(this.oMapper.writeValueAsString(result));
+	public HttpResponse handleOutput(HttpResponse response, OUT output) throws Exception {
+		response.setBody(this.oMapper.writeValueAsString(output));
 
 		return response;
 	}

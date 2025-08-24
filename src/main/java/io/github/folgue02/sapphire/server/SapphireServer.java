@@ -23,8 +23,8 @@ import java.util.Optional;
 public class SapphireServer implements HttpHandler {
 	public final Router router;
 	public final InetSocketAddress address;
-	public RouteHandler<?> notFoundHandler;
-	public RouteHandler<?> internalServerErrorHandler;
+	public RouteHandler notFoundHandler;
+	public RouteHandler internalServerErrorHandler;
 
 	public SapphireServer(Router router, InetSocketAddress address) {
 		this.address = address;
@@ -47,7 +47,8 @@ public class SapphireServer implements HttpHandler {
 		final RouteSpecification rSpec;
 		final RouteHandler routeHandler;
 
-		HttpRequest request;
+		final HttpRequest request;
+		final HttpResponse response = new HttpResponse();
 		try {
 			request = HttpUtils.requestFromExchange(exchange);
 		} catch (Exception e) {
@@ -62,7 +63,7 @@ public class SapphireServer implements HttpHandler {
 		// If the filter decides to forward the request to a different handler, this one is 
 		// executed, and whatever other handler that would have been chosen for the request is ignored.
 		for (var filter : matchedRouteFilters) {
-			boolean continueChain = runFilter(request, exchange, filter);
+			boolean continueChain = runFilter(request, response, exchange, filter);
 			if (!continueChain)
 				return;
 		}
@@ -77,7 +78,7 @@ public class SapphireServer implements HttpHandler {
 			routeHandler = handlerOpt.get().getValue();
 		}
 
-		if (!runHandler(request, exchange, routeHandler)) {
+		if (!runHandler(request, response, exchange, routeHandler)) {
 			System.err.printf("The route handler (%s) has failed.\n", routeHandler);
 		}
 	}
@@ -88,9 +89,9 @@ public class SapphireServer implements HttpHandler {
 	/// @param exchange Http exchange object in which the response will be written into.
 	/// @param routeHandler Route handler to run.
 	/// @return `true` if the handler has been executed without errors, `false` otherwise.
-	public boolean runHandler(HttpRequest request, HttpExchange exchange, RouteHandler routeHandler) {
+	public boolean runHandler(HttpRequest request, HttpResponse response, HttpExchange exchange, RouteHandler routeHandler) {
 		try (exchange) {
-			var response = routeHandler.runHandler(request);
+			response = routeHandler.runHandler(request, response);
 			this.writeResponse(response, exchange);
 			return true;
 		} catch (Exception e) {
@@ -110,11 +111,11 @@ public class SapphireServer implements HttpHandler {
 	/// meaning that the filter hasn't passed on the request to the next element 
 	/// in the chain)*, `true` otherwise *(meaning that the request has been allowed
 	/// continue to be passed to the next element in the chain)*. 
-	public boolean runFilter(HttpRequest request, HttpExchange exchange, RouteFilter filter) {
+	public boolean runFilter(HttpRequest request, HttpResponse response, HttpExchange exchange, RouteFilter filter) {
 		// TODO: Rethrow exceptions instead of just returning false?
 		Optional<RouteHandler> forcedHandler;
 		try {
-			forcedHandler = filter.filter(request);
+			forcedHandler = filter.filter(request, response);
 		} catch (Exception e) {
 			System.err.printf("An error ocurred while running the given filter(%s). \n", filter);
 			e.printStackTrace();
@@ -123,7 +124,7 @@ public class SapphireServer implements HttpHandler {
 		
 		if (forcedHandler.isPresent()) {
 			try {
-				HttpResponse response = forcedHandler.get().runHandler(request);
+				response = forcedHandler.get().runHandler(request, response);
 				writeResponse(response, exchange);
 			} catch (Exception e) {
 				System.err.printf("An error has ocurred while executing the handler (%s) given by the filter.", forcedHandler.get());

@@ -5,7 +5,7 @@ import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.exchange.StatusCode;
 import io.github.folgue02.sapphire.router.handler.RawStringHandler;
 
-public class InlineStringHandler extends RawStringHandler {
+public class InlineStringHandler extends RawStringHandler<Boolean> {
     private final String message;
     private final StatusCode returnStatusCode;
 
@@ -19,12 +19,17 @@ public class InlineStringHandler extends RawStringHandler {
         this.returnStatusCode = returnStatusCode;
     }
 
-    @Override
-    public String processInput(HttpRequest request) {
-        return this.message;
-    }
+	@Override
+	public Boolean handleInput(HttpRequest request) throws Exception {
+		return false;
+	}
 
-    @Override
+	@Override
+	public String run(HttpRequest _request, HttpResponse _response, Boolean _processedInput) throws Exception {
+		return message;
+	}
+
+	@Override
     public String getHandlerDescription() {
         return "Displays a provided text for the client.";
     }

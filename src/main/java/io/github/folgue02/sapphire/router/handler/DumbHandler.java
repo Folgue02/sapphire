@@ -6,10 +6,15 @@ import io.github.folgue02.sapphire.exchange.HttpResponse;
 /// Dumb handler, designed to be left as a **placeholder** in the router.
 ///
 /// Simply returns a dummy text.
-public class DumbHandler extends RawStringHandler {
+public class DumbHandler extends RawStringHandler<Boolean> {
 	@Override
-	public String processInput(HttpRequest _request) {
-		return "<h1>Dumb handler response! To be replaced!</h1>";
+	public Boolean handleInput(HttpRequest request) throws Exception {
+		return false;
+	}
+
+	@Override
+	public String run(HttpRequest _request, HttpResponse _response, Boolean _processedInput) throws Exception {
+		return "Dumb handler; TODO: Replace.";
 	}
 
 	@Override

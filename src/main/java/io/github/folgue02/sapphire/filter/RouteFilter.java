@@ -3,6 +3,7 @@ package io.github.folgue02.sapphire.filter;
 import java.util.Optional;
 
 import io.github.folgue02.sapphire.exchange.HttpRequest;
+import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.router.handler.RouteHandler;
 
 /// Route filters are units of logic which are executed before route handlers are.
@@ -21,5 +22,5 @@ public interface RouteFilter {
 	/// @return If the request is filtered out, [Optional#of(T)] is returned with the
 	/// handler to be executed by the server, but if the request passes the filter, 
 	/// [Optional#empty()] should be returned.
-	Optional<RouteHandler> filter(HttpRequest request) throws Exception;
+	Optional<RouteHandler> filter(HttpRequest request, HttpResponse response) throws Exception;
 }

@@ -18,6 +18,7 @@ public final class HttpResponse {
 	public HttpResponse() {
 		this.status = StatusCode.OK;
 		this.headers = new HashMap<>();
+		this.body = new byte[0];
 	}
 
 	public void setBody(String body) {
