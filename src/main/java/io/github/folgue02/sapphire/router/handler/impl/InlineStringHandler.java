@@ -20,7 +20,7 @@ public class InlineStringHandler extends RawStringHandler {
     }
 
     @Override
-    public String handleRequest(HttpRequest request, HttpResponse response) {
+    public String processInput(HttpRequest request) {
         return this.message;
     }
 

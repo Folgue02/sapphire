@@ -7,7 +7,7 @@ import io.github.folgue02.sapphire.server.exception.HandlerExecutionException;
 
 public interface RouteHandler<T> {
 	/// Handles the request, and returns the expected result.
-	public T handleRequest(HttpRequest request, HttpResponse response) throws Exception;
+	public T processInput(HttpRequest request) throws Exception;
 
 	/// Processes the result from the handler, and returns the response which will be given to the user.
 	public HttpResponse processResult(HttpResponse response, T result) throws Exception;
@@ -17,7 +17,7 @@ public interface RouteHandler<T> {
 
 		T result;
 		try {
-			result = this.handleRequest(request, response);
+			result = this.processInput(request);
 		} catch (Exception e) {
 			throw new HandlerExecutionException(this.getClass(), "Execution of handle() failed.", e);
 		}

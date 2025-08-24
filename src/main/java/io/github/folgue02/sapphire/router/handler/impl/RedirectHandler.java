@@ -14,7 +14,7 @@ public final class RedirectHandler implements RouteHandler<Boolean> {
 	}
 
 	@Override
-	public Boolean handleRequest(HttpRequest request, HttpResponse response) throws Exception {
+	public Boolean processInput(HttpRequest request) throws Exception {
 		return false;
 	}
 

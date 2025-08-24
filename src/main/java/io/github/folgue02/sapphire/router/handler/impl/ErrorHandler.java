@@ -23,7 +23,7 @@ public class ErrorHandler extends RawStringHandler {
 	}
 
 	@Override
-	public String handleRequest(HttpRequest request, HttpResponse response) throws Exception {
+	public String processInput(HttpRequest request) throws Exception {
 		String errorCauseMsg = "<p class=\"error-cause\">" + Objects.requireNonNullElse(this.errorCause, StringUtils.EMPTY) + "</p>";
 		return """
 				<style>
