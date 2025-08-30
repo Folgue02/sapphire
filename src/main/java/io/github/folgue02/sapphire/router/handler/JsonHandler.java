@@ -19,6 +19,6 @@ public abstract class JsonHandler<IN, OUT> extends IORouteHandler<IN, OUT> {
 
 	@Override
 	public String getHandlerDescription() {
-		return "A handler which turns the result of handle() into a JSON string.";
+		return "A handler which turns the result of run() into a JSON string.";
 	}
 }
