@@ -8,36 +8,38 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.folgue02.sapphire.exchange.HttpMethod;
 import io.github.folgue02.sapphire.exchange.HttpRequest;
+import io.github.folgue02.sapphire.exchange.HttpResponse;
 import io.github.folgue02.sapphire.filter.FilterPriority;
 import io.github.folgue02.sapphire.filter.FilterSpecification;
 import io.github.folgue02.sapphire.filter.RouteFilter;
+import io.github.folgue02.sapphire.router.handler.RouteHandler;
 
 
 public class TestRouter {
 	static class RouteFilterLowPrio implements RouteFilter {
 		@Override
-		public Optional<RouteHandlerBackup> filter(HttpRequest request) throws Exception {
+		public Optional<RouteHandler> filter(HttpRequest request, HttpResponse _response) throws Exception {
 		    return Optional.empty();
 		}
 	}
 
 	static class RouteFilterHighPrio implements RouteFilter {
 		@Override
-		public Optional<RouteHandlerBackup> filter(HttpRequest request) throws Exception {
+		public Optional<RouteHandler> filter(HttpRequest request, HttpResponse _response) throws Exception {
 		    return Optional.empty();
 		}
 	}
 
 	static class RouteFilterDefaultPrio implements RouteFilter {
 		@Override
-		public Optional<RouteHandlerBackup> filter(HttpRequest request) throws Exception {
+		public Optional<RouteHandler> filter(HttpRequest request, HttpResponse _response) throws Exception {
 		    return Optional.empty();
 		}
 	}
 
 	static class RouteFilterExtremePrio implements RouteFilter {
 		@Override
-		public Optional<RouteHandlerBackup> filter(HttpRequest request) throws Exception {
+		public Optional<RouteHandler> filter(HttpRequest request, HttpResponse _response) throws Exception {
 		    return Optional.empty();
 		}
 	}
